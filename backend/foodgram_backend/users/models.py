@@ -6,10 +6,7 @@ from .constants import EMAIL_LENGTH, NAME_LENGTH
 
 class Users(AbstractUser):
     avatar = models.ImageField(
-        upload_to='media/users/',
-        null=True,
-        default=None
-    )
+        'Аватар', upload_to='/users/avatars/', null=True, default=None)
     first_name = models.CharField(
         'Имя', max_length=NAME_LENGTH, blank=False)
     last_name = models.CharField(
