@@ -1,5 +1,5 @@
 from djoser.permissions import CurrentUserOrAdmin
-from djoser.views import UserViewSet
+from djoser.views import UserViewSet as BaseUserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from .serializers import AvatarSerializer
 
 
-class UsersViewSet(UserViewSet):
+class UsersViewSet(BaseUserViewSet):
 
     def get_serializer_class(self):
         if self.action == 'avatar':
