@@ -13,7 +13,7 @@ User = get_user_model()
 class Ingredient(models.Model):
     name = models.CharField(
         'Название', max_length=INGREDIENT_NAME_LENGTH)
-    meaurement_unit = models.CharField(
+    measurement_unit = models.CharField(
         'Единицы измерения', max_length=UNIT_NAME_LENGTH)
 
     class Meta:
@@ -22,7 +22,7 @@ class Ingredient(models.Model):
         ordering = ['name', 'id']
 
     def __str__(self):
-        return f'{self.name} ({self.meaurement_unit})'
+        return f'{self.name} ({self.measurement_unit})'
 
 
 class Tag(models.Model):
@@ -50,7 +50,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient, through='RecipeIngredient', verbose_name='Ингредиенты')
     tags = models.ManyToManyField(
-        Tag, through='RecipeTag', verbose_name='Тэг')
+        Tag, through='RecipeTag', verbose_name='Тег')
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         validators=[
@@ -107,5 +107,22 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return (
             f'{self.ingredient.name} - {self.amount}'
-            f'({self.ingredient.meaurement_unit}) - {self.recipe.name}'
+            f'({self.ingredient.measurement_unit}) - {self.recipe.name}'
+        )
+
+
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='favorite_recipes')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='favorite_for_users')
+
+    class Meta:
+        verbose_name = 'избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+
+    def __str__(self):
+        return (
+            f'{self.recipe.name} в избраном '
+            f'для пользователя {self.user.username}'
         )
