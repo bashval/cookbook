@@ -18,15 +18,20 @@ class Users(AbstractUser):
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'Пользователи'
         ordering = ['id']
 
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
 
-class Follow(models.Model):
+
+class Subscription(models.Model):
     user = models.ForeignKey(
-        Users, on_delete=models.CASCADE, related_name='following'
+        Users, on_delete=models.CASCADE, related_name='subscriptions'
     )
     following = models.ForeignKey(
-        Users, on_delete=models.CASCADE, related_name='followers'
+        Users, on_delete=models.CASCADE, related_name='subscribers'
     )
 
     class Meta:

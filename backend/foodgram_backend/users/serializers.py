@@ -38,5 +38,5 @@ class UserReadSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         current_user = self.context['request'].user
         if current_user.is_authenticated:
-            return obj in current_user.following.all()
+            return obj in current_user.subscriptions.all()
         return False
