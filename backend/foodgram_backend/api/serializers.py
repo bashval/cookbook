@@ -20,7 +20,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'slug')
 
 
-class RecipeIngredientSerializer(serializers.ModelSerializer):
+class RecipeIngredientReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
@@ -47,7 +47,7 @@ class AmountSerializer(serializers.ModelSerializer):
         fields = ('amount',)
 
 
-class RecIngCreateSerializer(serializers.ModelSerializer):
+class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
 
     class Meta:
@@ -61,7 +61,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     author = UserReadSerializer(read_only=True)
     image = Base64ImageField()
-    ingredients = RecIngCreateSerializer(many=True, write_only=True)
+    ingredients = RecipeIngredientSerializer(many=True, write_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -90,7 +90,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, recipe_instance):
         ret = super().to_representation(recipe_instance)
-        ret['ingredients'] = RecipeIngredientSerializer(
+        ret['ingredients'] = RecipeIngredientReadSerializer(
             recipe_instance.ingredients.all(),
             many=True,
             context={'recipe_instance': recipe_instance}
@@ -146,19 +146,27 @@ class RecipeSerializer(serializers.ModelSerializer):
         return values
 
 
+class ShortLinkSerializer(serializers.Serializer):
+    short_link = serializers.URLField()
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['short-link'] = ret.pop('short_link')
+        return ret
+
+
 class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=True)
     author = UserReadSerializer(required=False)
     image = Base64ImageField()
     ingredients = serializers.SerializerMethodField()
-    # ingredients = IngredientSerializer(many=True)
 
     class Meta:
         model = Recipe
         fields = '__all__'
 
     def get_ingredients(self, recipe):
-        return RecipeIngredientSerializer(
+        return RecipeIngredientReadSerializer(
             recipe.ingredients.all(),
             many=True,
             context={'recipe_instance': recipe}
