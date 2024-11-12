@@ -135,7 +135,7 @@ class FavoriteRecipe(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='favorite_recipes')
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='favorite_for_users')
+        Recipe, on_delete=models.CASCADE, related_name='is_favorited')
 
     class Meta:
         verbose_name = 'избранный рецепт'
@@ -147,8 +147,8 @@ class FavoriteRecipe(models.Model):
 
     def __str__(self):
         return (
-            f'{self.recipe.name} в избраном '
-            f'для пользователя {self.user.username}'
+            f'"{self.recipe.name}" в избраном '
+            f'для пользователя {self.user}'
         )
 
 
@@ -156,7 +156,7 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='shopping_cart')
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='in_cart_for_users')
+        Recipe, on_delete=models.CASCADE, related_name='is_in_shopping_cart')
 
     class Meta:
         verbose_name = 'список покупок'
@@ -168,6 +168,6 @@ class ShoppingCart(models.Model):
 
     def __str__(self):
         return (
-            f'{self.recipe.name} в списке покупок '
-            f'пользователя {self.user.username}'
+            f'"{self.recipe.name}" в списке покупок '
+            f'пользователя {self.user}'
         )
