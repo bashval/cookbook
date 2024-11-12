@@ -1,7 +1,5 @@
-from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.crypto import get_random_string
-from django.utils.http import urlencode
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
@@ -9,14 +7,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
-from recipes.models import Ingredient, Recipe, Tag, RecipeIngredient
+from recipes.models import (
+    Ingredient, FavoriteRecipe, Recipe, ShoppingCart, Tag)
 from .constants import SHORT_LINK_LENGTH
 from .filters import IngredientFilter, RecipeFilter
 from .models import ShortLinkRecipe
 from .serializers import (
-    IngredientSerializer, RecipeSerializer, TagSerializer, ShortLinkSerializer)
-
-User = get_user_model()
+    IngredientSerializer, FavoriteRecipeSerializer,
+    RecipeSerializer, ShortLinkSerializer, TagSerializer)
+from .utils import favorite_shoppingcart_handler
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -65,13 +64,17 @@ class RecipeViewSet(ModelViewSet):
         serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=['post', 'delete'], detail=True)
+    def favorite(self, request, pk):
+        return favorite_shoppingcart_handler(
+            request, pk, FavoriteRecipe, FavoriteRecipeSerializer)
+
+    @action(methods=['post', 'delete'], detail=True)
+    def shopping_cart(self, request, pk):
+        return favorite_shoppingcart_handler(
+            request, pk, ShoppingCart, FavoriteRecipeSerializer)
+
 
 def short_link_redirect(request, slug):
     link = get_object_or_404(ShortLinkRecipe, url_slug=slug)
     return redirect('recipe-detail', pk=link.recipe.id)
-
-
-class TestViewSet(ModelViewSet):
-    pagination_class = None
-    # serializer_class = AmountSerializer
-    queryset = RecipeIngredient.objects.all()
