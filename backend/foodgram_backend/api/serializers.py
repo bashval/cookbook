@@ -4,6 +4,7 @@ from rest_framework import serializers
 from recipes.models import (
     Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag)
 from users.serializers import Base64ImageField, UserReadSerializer
+from .utils import get_user_related_recipes
 
 User = get_user_model()
 
@@ -77,16 +78,26 @@ class RecipeSerializer(serializers.ModelSerializer):
         return fields
 
     def get_is_favorited(self, obj):
-        current_user = self.context['request'].user
-        if current_user.is_authenticated:
-            return obj in current_user.favorite_recipes.all()
-        return False
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
+        return obj.is_favorited.filter(user=user).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        current_user = self.context['request'].user
-        if current_user.is_authenticated:
-            return obj in current_user.shopping_cart.all()
-        return False
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
+        return obj.is_in_shopping_cart.filter(user=user).exists()
+        # user = self.context['request'].user
+        # shopping_cart = get_user_related_recipes(user, 'is_in_shopping_cart')
+        # return obj in shopping_cart
+        # current_user = self.context['request'].user
+        # if current_user.is_authenticated:
+        #     user_shopping_cart = [
+        #         obj.recipe for obj in current_user.shopping_cart.all()
+        #     ]
+        #     return obj in user_shopping_cart
+        # return False
 
     def to_representation(self, recipe_instance):
         ret = super().to_representation(recipe_instance)
@@ -155,30 +166,8 @@ class ShortLinkSerializer(serializers.Serializer):
         return ret
 
 
-class RecipeReadSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, required=True)
-    author = UserReadSerializer(required=False)
-    image = Base64ImageField()
-    ingredients = serializers.SerializerMethodField()
+class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = '__all__'
-
-    def get_ingredients(self, recipe):
-        return RecipeIngredientReadSerializer(
-            recipe.ingredients.all(),
-            many=True,
-            context={'recipe_instance': recipe}
-        ).data
-
-    # def validate_tags(self, values):
-    #     instancies = []
-    #     for value in values:
-    #         try:
-    #             instance = Tag.objects.get(id=value)
-    #         except Tag.DoesNotExist:
-    #             raise serializers.ValidationError('No such tag.')
-    #         instancies.append(instance)
-    #     print('____________HEY_______', instancies)
-    #     return instancies
+        fields = ('id', 'name', 'image', 'cooking_time')
