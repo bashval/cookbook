@@ -1,19 +1,18 @@
 from django.db.models import Q
-from django_filters.rest_framework import CharFilter, FilterSet, NumberFilter, ModelMultipleChoiceFilter
+from django_filters.rest_framework import (
+    BooleanFilter, CharFilter, FilterSet,
+    NumberFilter, ModelMultipleChoiceFilter
+)
 
 from recipes.models import Ingredient, Recipe, Tag
 
 
 class IngredientFilter(FilterSet):
     name = CharFilter(field_name='name', lookup_expr='istartswith')
-    # name = CharFilter(field_name='name', method='name_filter')
 
     class Meta:
         model = Ingredient
         fields = ['name',]
-
-    # def name_filter(self, queryset, name, value):
-    #     return queryset.filter(Q(name__istartswith=value) | Q(name__icontains=value))
 
 
 class RecipeFilter(FilterSet):
@@ -23,9 +22,23 @@ class RecipeFilter(FilterSet):
         queryset=Tag.objects.all(),
         to_field_name='slug'
     )
+    is_favorited = BooleanFilter(method='filter_for_boolean')
+    is_in_shopping_cart = BooleanFilter(method='filter_for_boolean')
 
     class Meta:
         model = Recipe
-        fields = ['author', 'tags']
+        fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
 
- # 'is_favorited', 'is_in_shopping_cart', 
+    def filter_for_boolean(self, queryset, name, value):
+        current_user = self.request.user
+        if not current_user.is_authenticated:
+            return queryset if not value else queryset.none()
+
+        lookup = '__'.join([name, 'user__id'])
+        user_id = current_user.id
+        if value:
+            filter = Q(**{lookup: user_id})
+        else:
+            filter = ~Q(**{lookup: user_id})
+
+        return queryset.filter(filter)
