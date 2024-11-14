@@ -4,7 +4,7 @@ from django.db import models
 from .constants import EMAIL_LENGTH, NAME_LENGTH
 
 
-class Users(AbstractUser):
+class User(AbstractUser):
     avatar = models.ImageField(
         'Аватар', upload_to='users/', null=True, default=None)
     first_name = models.CharField(
@@ -28,10 +28,13 @@ class Users(AbstractUser):
 
 class Subscription(models.Model):
     user = models.ForeignKey(
-        Users, on_delete=models.CASCADE, related_name='subscriptions'
+        User, on_delete=models.CASCADE, related_name='subscriptions'
     )
-    following = models.ForeignKey(
-        Users, on_delete=models.CASCADE, related_name='subscribers'
+    subscribing = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscribers',
+        related_query_name='subscribing'
     )
 
     class Meta:
@@ -39,9 +42,9 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'following'], name='unique_followers'
+                fields=['user', 'subscribing'], name='unique_followers'
             )
         ]
 
     def __str__(self):
-        return f'{self.user} подписан на {self.following}'
+        return f'{self.user} подписан на {self.subscribing}'
