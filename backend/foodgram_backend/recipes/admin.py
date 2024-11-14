@@ -29,7 +29,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='Количество добавлений в избраное')
     def favorite_count(self, obj):
-        return obj.favorite_for_users.count()
+        return obj.is_favorited.count()
 
 
 class TagAdmin(admin.ModelAdmin):

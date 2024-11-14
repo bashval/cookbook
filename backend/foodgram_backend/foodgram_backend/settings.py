@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 # User Model
 
-AUTH_USER_MODEL = 'users.Users'
+AUTH_USER_MODEL = 'users.User'
 
 
 # Database
@@ -156,8 +156,8 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
-        'user': 'users.serializers.UserReadSerializer',
-        'current_user': 'users.serializers.UserReadSerializer'
+        'user': 'api.serializers.UserReadSerializer',
+        'current_user': 'api.serializers.UserReadSerializer'
     },
 
     'PERMISSIONS': {
