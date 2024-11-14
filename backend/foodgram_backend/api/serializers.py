@@ -6,7 +6,10 @@ from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
 from recipes.models import (
-    Ingredient, Recipe, RecipeIngredient, RecipeTag, Tag)
+    FavoriteRecipe, Ingredient, Recipe,
+    RecipeIngredient, RecipeTag, ShoppingCart, Tag
+)
+from users.models import Subscription
 
 User = get_user_model()
 
@@ -169,8 +172,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         if not values:
             raise serializers.ValidationError('Это поле не может быть пустым.')
         if len(values) != len(set(values)):
-            print('_______value_____', values)
-            print('______set________', list(set(values)))
             message = 'У рецепта не могут быть повторяющиеся теги.'
             raise serializers.ValidationError(message)
         return values
@@ -200,10 +201,52 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class Favorite
+class UserRelatedBaseSerializer(serializers.ModelSerializer):
 
-class SubscribeUserSerializer(UserReadSerializer):
-    recipes = ShortRecipeSerializer(many=True)
+    def save(self, **kwargs):
+        model = self.Meta.model
+        if model.objects.filter(**kwargs).exists():
+            raise serializers.ValidationError('Объект уже был добавлен ранее.')
+        return super().save(**kwargs)
+
+
+class UserRecipeBaseSerializer(UserRelatedBaseSerializer):
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret = ShortRecipeSerializer(Recipe.objects.get(id=ret['recipe'])).data
+        return ret
+
+
+class FavoriteRecipeSerializer(UserRecipeBaseSerializer):
+    class Meta:
+        model = FavoriteRecipe
+        fields = '__all__'
+        read_only_fields = ('user', 'recipe')
+
+
+class ShoppingCartSerialiser(UserRecipeBaseSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'
+        read_only_fields = ('user', 'recipe')
+
+
+class SubscriptionSerializer(UserRelatedBaseSerializer):
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+        read_only_fields = ('user', 'subscribing')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret = SubscriptionReadSerializer(
+            User.objects.get(id=ret['subscribing']), context=self.context).data
+        return ret
+
+
+class SubscriptionReadSerializer(UserReadSerializer):
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -212,6 +255,13 @@ class SubscribeUserSerializer(UserReadSerializer):
             'email', 'id', 'username', 'first_name', 'last_name',
             'is_subscribed', 'recipes', 'recipes_count', 'avatar'
         )
+
+    def get_recipes(self, obj):
+        recipes_limit = self.context['request'].query_params.get(
+            'recipes_limit', None)
+        recipes_limit = int(recipes_limit) if recipes_limit else None
+        queryset = Recipe.objects.filter(author=obj)[:recipes_limit]
+        return ShortRecipeSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()

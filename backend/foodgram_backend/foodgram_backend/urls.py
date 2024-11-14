@@ -22,7 +22,6 @@ from api.views import short_link_redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('api/', include('users.urls')),
     path('api/', include('api.urls')),
     path('s/<slug:slug>/', short_link_redirect, name='short_link_redirect')
 ]

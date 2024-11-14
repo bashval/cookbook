@@ -7,9 +7,10 @@ from djoser.permissions import CurrentUserOrAdmin
 from djoser.views import UserViewSet as BaseUserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ParseError
+from rest_framework.permissions import (
+    IsAuthenticated, IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from recipes.models import (
@@ -17,12 +18,15 @@ from recipes.models import (
 from users.models import Subscription
 from .constants import SHORT_LINK_LENGTH
 from .filters import IngredientFilter, RecipeFilter
+from .mixins import UserRelatedModelMixin
 from .models import ShortLinkRecipe
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
-    AvatarSerializer, IngredientSerializer, RecipeSerializer,
-    ShortLinkSerializer, ShortRecipeSerializer, TagSerializer, SubscribeUserSerializer)
-from .utils import user_related_model_request_handler, create_related_model_instance, delete_related_model_instance
+    AvatarSerializer, FavoriteRecipeSerializer, IngredientSerializer,
+    RecipeSerializer, ShortLinkSerializer, ShortRecipeSerializer,
+    TagSerializer, ShoppingCartSerialiser, SubscriptionReadSerializer,
+    SubscriptionSerializer
+)
 
 User = get_user_model()
 
@@ -44,7 +48,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = [IsOwnerOrReadOnly, ]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
     serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
     http_method_names = ['get', 'post', 'patch', 'delete']
@@ -79,38 +83,36 @@ class RecipeViewSet(ModelViewSet):
         serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['post', 'delete'], detail=True)
-    def favorite(self, request, pk):
-        recipe = get_object_or_404(self.get_queryset(), pk=pk)
-        return user_related_model_request_handler(
-            request=request,
-            obj=recipe,
-            serializer=self.get_serializer(recipe),
-            model=FavoriteRecipe,
-        )
+    @action(['get'], detail=False)
+    def download_shopping_cart(self, request):
+        # TO DO
+        return Response(status=status.HTTP_200_OK)
 
-    @action(methods=['post', 'delete'], detail=True)
-    def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(self.get_queryset(), pk=pk)
-        current_user = request.user
-        if request.method == 'POST':
-            create_related_model_instance(
-                model=ShoppingCart,
-                objects=(recipe, current_user)
-            )
-            return self.retrieve(request)
-        elif request.method == 'DELETE':
-            delete_related_model_instance(
-                model=ShoppingCart,
-                objects=(recipe, current_user)
-            )
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        # return user_related_model_request_handler(
-        #     request=request,
-        #     obj=recipe,
-        #     serializer=self.get_serializer(recipe),
-        #     model=ShoppingCart
-        # )
+
+class FavoriteRecipeViewSet(UserRelatedModelMixin):
+    queryset = FavoriteRecipe.objects.all()
+    serializer_class = FavoriteRecipeSerializer
+    ralated_object_model = Recipe
+    related_object_field_name = 'recipe'
+
+
+class ShoppingCartViewSet(UserRelatedModelMixin):
+    queryset = ShoppingCart.objects.all()
+    serializer_class = ShoppingCartSerialiser
+    ralated_object_model = Recipe
+    related_object_field_name = 'recipe'
+
+
+class SubscriptionViewSet(UserRelatedModelMixin):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    ralated_object_model = User
+    related_object_field_name = 'subscribing'
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        if request.user == self.relted_object:
+            raise ParseError('Нельзя подписаться на самого себя.')
 
 
 def short_link_redirect(request, slug):
@@ -123,8 +125,8 @@ class UsersViewSet(BaseUserViewSet):
     def get_serializer_class(self):
         if self.action == 'avatar':
             return AvatarSerializer
-        elif self.action == 'subscribe' or self.action == 'subscriptions':
-            return SubscribeUserSerializer
+        elif self.action == 'subscriptions':
+            return SubscriptionReadSerializer
         return super().get_serializer_class()
 
     @action(methods=['put', 'delete'], detail=False, url_path='me/avatar')
@@ -148,34 +150,7 @@ class UsersViewSet(BaseUserViewSet):
         if request.method == "GET":
             return self.retrieve(request, *args, **kwargs)
 
-    @action(['post', 'delete'], detail=True)
-    def subscribe(self, request, id):
-        user_to_subscribe = get_object_or_404(self.get_queryset(), id=id)
-        current_user = request.user
-
-        if current_user == user_to_subscribe:
-            raise ValidationError('Нелья подписаться на самого себя.')
-        objects = ({'subscribing': user_to_subscribe}, current_user)
-
-        if request.method == 'POST':
-            create_related_model_instance(model=Subscription, objects=objects)
-            return self.retrieve(request)
-
-        elif request.method == 'DELETE':
-            delete_related_model_instance(model=Subscription, objects=objects)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        # return user_related_model_request_handler(
-        #     request=request,
-        #     obj=following_user,
-        #     serializer=self.get_serializer(following_user),
-        #     model=Subscription,
-        #     lookup_name='subscribing',
-
     @action(['get'], detail=False, permission_classes=(IsAuthenticated, ))
     def subscriptions(self, request):
         self.queryset = User.objects.filter(subscribing__user=request.user)
-        # qs = User.objects.filter(subscriptions__subscribing=request.user)
-        # qs = User.objects.filter(subscribing__user=request.user)
-        # self.queryset = request.user.subscriptions.values('subscribing')
-        # print('__________QS__________', qs)
         return self.list(request)
