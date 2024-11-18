@@ -126,7 +126,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if not user.is_authenticated:
             return False
-        return obj.is_in_shopping_cart.filter(user=user).exists()
+        return obj.in_shopping_cart.filter(user=user).exists()
 
     def to_representation(self, recipe_instance):
         ret = super().to_representation(recipe_instance)
