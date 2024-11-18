@@ -259,7 +259,11 @@ class SubscriptionReadSerializer(UserReadSerializer):
     def get_recipes(self, obj):
         recipes_limit = self.context['request'].query_params.get(
             'recipes_limit', None)
-        recipes_limit = int(recipes_limit) if recipes_limit else None
+        if recipes_limit:
+            try:
+                recipes_limit = int(recipes_limit)
+            except ValueError:
+                recipes_limit = None
         queryset = Recipe.objects.filter(author=obj)[:recipes_limit]
         return ShortRecipeSerializer(queryset, many=True).data
 
