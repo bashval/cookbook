@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.crypto import get_random_string
 from django.urls import reverse
@@ -27,6 +28,7 @@ from .serializers import (
     TagSerializer, ShoppingCartSerialiser, SubscriptionReadSerializer,
     SubscriptionSerializer
 )
+from .utils import get_pdf_shopping_list
 
 User = get_user_model()
 
@@ -83,10 +85,18 @@ class RecipeViewSet(ModelViewSet):
         serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(['get'], detail=False)
+    @action(['get'], detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        # TO DO
-        return Response(status=status.HTTP_200_OK)
+        shopping_cart = (
+            self.queryset
+            .filter(shoppingcart__user=request.user)
+            .prefetch_related(
+                'recipeingredient_set',
+                'recipeingredient_set__ingredient'
+            ))
+        file = get_pdf_shopping_list(shopping_cart)
+        return FileResponse(
+            file, as_attachment=True, filename='shopping_list.pdf')
 
 
 class FavoriteRecipeViewSet(UserRelatedModelMixin):
