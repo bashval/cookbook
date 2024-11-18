@@ -34,11 +34,10 @@ class RecipeFilter(FilterSet):
         if not current_user.is_authenticated:
             return queryset if not value else queryset.none()
 
-        lookup = '__'.join([name, 'user__id'])
-        user_id = current_user.id
+        lookup = '__'.join([name, 'user'])
         if value:
-            filter = Q(**{lookup: user_id})
+            filter = Q(**{lookup: current_user})
         else:
-            filter = ~Q(**{lookup: user_id})
+            filter = ~Q(**{lookup: current_user})
 
         return queryset.filter(filter)

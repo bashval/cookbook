@@ -89,7 +89,7 @@ class RecipeViewSet(ModelViewSet):
     def download_shopping_cart(self, request):
         shopping_cart = (
             self.queryset
-            .filter(shoppingcart__user=request.user)
+            .filter(is_in_shopping_cart__user=request.user)
             .prefetch_related(
                 'recipeingredient_set',
                 'recipeingredient_set__ingredient'
