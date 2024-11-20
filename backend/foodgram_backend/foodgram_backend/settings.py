@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-# import os
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@=pa_ixg(8o)7r+s*9*08fhhkvc98dv8(nll&k^n$%s*6n11x0'
+SECRET_KEY = os.getenv('SECRET_KEY', 'abcdefghijklmnopqrstuvwxyz')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split()
 
 
 # Application definition
@@ -88,6 +88,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.postgresql',
+        # 'NAME': os.getenv('POSTGRES_DB', 'django'),
+        # 'USER': os.getenv('POSTGRES_USER', 'django'),
+        # 'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        # 'HOST': os.getenv('DB_HOST', ''),
+        # 'PORT': os.getenv('DB_PORT', 5432)
     }
 }
 
@@ -149,7 +155,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.paginators.PageNumberPagination',
     'PAGE_SIZE': 6,
 }
 
