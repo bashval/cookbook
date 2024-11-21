@@ -2,8 +2,10 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    FavoriteRecipeViewSet, IngredientViewSet, RecipeViewSet,
-    ShoppingCartViewSet, SubscriptionViewSet, TagViewSet, UsersViewSet
+    FavoriteRecipeViewSet, IngredientViewSet,
+    RecipeViewSet, short_link_redirect,
+    ShoppingCartViewSet, SubscriptionViewSet,
+    TagViewSet, UsersViewSet
 )
 
 
@@ -32,6 +34,7 @@ urlpatterns = [
         shopping_cart_view,
         name='shopping_cart'
     ),
+    path('s/<slug:slug>/', short_link_redirect, name='short_link_redirect'),
     path(
         'users/<int:obj_id>/subscribe/',
         subscription_view,
