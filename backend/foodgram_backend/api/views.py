@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.crypto import get_random_string
-from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.permissions import CurrentUserOrAdmin
 from djoser.views import UserViewSet as BaseUserViewSet
@@ -17,10 +15,9 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from recipes.models import (
     Ingredient, FavoriteRecipe, Recipe, ShoppingCart, Tag)
 from users.models import Subscription
-from .constants import SHORT_LINK_LENGTH
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import UserRelatedModelMixin
-from .models import ShortLinkRecipe
+from .models import ShortLink
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AvatarSerializer, FavoriteRecipeSerializer, IngredientSerializer,
@@ -28,7 +25,7 @@ from .serializers import (
     TagSerializer, ShoppingCartSerialiser, SubscriptionReadSerializer,
     SubscriptionSerializer
 )
-from .utils import get_pdf_shopping_list
+from .utils import create_short_link, get_pdf_shopping_list
 
 User = get_user_model()
 
@@ -69,20 +66,8 @@ class RecipeViewSet(ModelViewSet):
 
     @action(methods=['get'], detail=True, url_path='get-link')
     def get_link(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        while True:
-            url_slug = get_random_string(length=SHORT_LINK_LENGTH)
-            if not ShortLinkRecipe.objects.filter(url_slug=url_slug).exists():
-                break
-        short_link = ShortLinkRecipe(recipe=recipe, url_slug=url_slug)
-        short_link.save()
-
-        relative_url = reverse(
-            'short_link_redirect', kwargs={'slug': url_slug})
-        short_link_url = request.build_absolute_uri(relative_url)
-        data = {'short_link': short_link_url}
-        serializer = ShortLinkSerializer(data=data)
-        serializer.is_valid()
+        short_link = create_short_link(request, pk)
+        serializer = ShortLinkSerializer(short_link)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(['get'], detail=False, permission_classes=[IsAuthenticated])
@@ -126,8 +111,8 @@ class SubscriptionViewSet(UserRelatedModelMixin):
 
 
 def short_link_redirect(request, slug):
-    link = get_object_or_404(ShortLinkRecipe, url_slug=slug)
-    return redirect('recipe-detail', pk=link.recipe.id)
+    link = get_object_or_404(ShortLink, short_link_slug=slug)
+    return redirect(link.redirect_url)
 
 
 class UsersViewSet(BaseUserViewSet):

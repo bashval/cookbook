@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
+from .models import ShortLink
 from recipes.models import (
     FavoriteRecipe, Ingredient, Recipe,
     RecipeIngredient, RecipeTag, ShoppingCart, Tag
@@ -186,13 +187,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         return values
 
 
-class ShortLinkSerializer(serializers.Serializer):
-    short_link = serializers.URLField()
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['short-link'] = ret.pop('short_link')
-        return ret
+class ShortLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShortLink
+        fields = ('short-link',)
+        extra_kwargs = {
+            'short-link': {'source': 'short_link_url'},
+        }
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
