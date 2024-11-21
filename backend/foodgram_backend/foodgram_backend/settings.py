@@ -76,6 +76,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
+CSRF_TRUSTED_ORIGINS = list(os.getenv('CSRF_TRUSTED_ORIGINS', ''))
+
 # User Model
 
 AUTH_USER_MODEL = 'users.User'
