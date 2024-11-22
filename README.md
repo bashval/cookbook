@@ -90,7 +90,7 @@ scp -i path_to_SSH/SSH_name docker-compose.production.yml \
 
 ## GitHub Action Workflow
 
-К проекту подключена `CI/CD` инструкция от платформы GitHub Action
+К проекту подключена `CI/CD` инструкция от платформы GitHub Action [![Main Foodgram Workflow](https://github.com/bashval/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/bashval/foodgram/actions/workflows/main.yml)
 
 Инструкция запускается при команде `git push` в любую из веток проекта. В ходе выполнения инструкции запускаются автоматические тесты для фронтенда и бэкенда. Далее, если тесты прошли успешно и **только** если  `push` выполнен в ветку `main`, произойдет сбока Docker имеджей на основе залитого кода и загрузка собранных имеджей на удаленный репозиторий на DockerHub. В дальнейшем на осове данных имеджей производится автоматический разворот проекта на удаленном сервере для продакшна. 
 
