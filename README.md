@@ -98,4 +98,4 @@ scp -i path_to_SSH/SSH_name docker-compose.production.yml \
 Данный проект выполнялся в качестве курсового проекта "Python-разработчик+" [Яндекс.Практикума](https://practicum.yandex.ru/).  
 Автор проекта: [Валентин Башкатов](https://github.com/bashval).
 
-![Tech Used](https://github-readme-tech-stack.vercel.app/api/cards?title=Technologies+Used&align=center&titleAlign=center&fontSize=26&lineCount=1&bg=%23ffffff&badge=%23000000&border=%2307d72a&titleColor=%230501f5&line1=Python%2CPython%2C9cc4e8%3BGitHub+Action%2CGitHub+Action%2C0004ff%3BDocker%2CDocker%2C58a6ff%3BDjango%2CDjango%2C58a6ff%3B)
+![Technologies Used](https://github-readme-tech-stack.vercel.app/api/cards?title=Technologies+Used&align=center&titleAlign=center&fontSize=28&lineCount=1&theme=blood&width=730&bg=%23FFFFFF&badge=%23EBEBEB&border=%23EBEBEB&titleColor=%23FF5F5F&line1=Python%2CPython%2C1799ea%3BDjango%2Cdjango%2C1799ea%3Bdjango+rest+framework%2Cdjango+rest+framework%2C1799ea%3Bdocker%2Cdocker%2C1799ea%3Bgithub+actions%2Cgithub+actions%2C1799ea%3B)
