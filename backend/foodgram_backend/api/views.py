@@ -4,27 +4,26 @@ from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.permissions import CurrentUserOrAdmin
 from djoser.views import UserViewSet as BaseUserViewSet
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
+                            Tag)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
-from rest_framework.permissions import (
-    IsAuthenticated, IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
-
-from recipes.models import (
-    Ingredient, FavoriteRecipe, Recipe, ShoppingCart, Tag)
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from users.models import Subscription
+
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import UserRelatedModelMixin
 from .models import ShortLink
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (
-    AvatarSerializer, FavoriteRecipeSerializer, IngredientSerializer,
-    RecipeSerializer, ShortLinkSerializer, ShortRecipeSerializer,
-    TagSerializer, ShoppingCartSerialiser, SubscriptionReadSerializer,
-    SubscriptionSerializer
-)
+from .serializers import (AvatarSerializer, FavoriteRecipeSerializer,
+                          IngredientSerializer, RecipeSerializer,
+                          ShoppingCartSerialiser, ShortLinkSerializer,
+                          ShortRecipeSerializer, SubscriptionReadSerializer,
+                          SubscriptionSerializer, TagSerializer)
 from .utils import create_short_link, get_pdf_shopping_list
 
 User = get_user_model()

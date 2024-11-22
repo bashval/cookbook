@@ -1,9 +1,7 @@
 from django.contrib import admin
 
-from .models import (
-    Ingredient, FavoriteRecipe, Recipe,
-    RecipeIngredient, RecipeTag, ShoppingCart, Tag
-)
+from .models import (FavoriteRecipe, Ingredient, Recipe, RecipeIngredient,
+                     RecipeTag, ShoppingCart, Tag)
 
 
 class IngredientAdmin(admin.ModelAdmin):

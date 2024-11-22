@@ -4,13 +4,13 @@ from django.conf import settings
 from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 
-from .constants import (
-    HEADER_FONT_SIZE, LINE_FONT_SIZE, NEW_LINE_OFFSET,
-    PAGE_LEFT_MARGIN, PAGE_X_SIZE, PAGE_Y_SIZE, SHORT_LINK_LENGTH)
+from .constants import (HEADER_FONT_SIZE, LINE_FONT_SIZE, NEW_LINE_OFFSET,
+                        PAGE_LEFT_MARGIN, PAGE_X_SIZE, PAGE_Y_SIZE,
+                        SHORT_LINK_LENGTH)
 from .models import ShortLink
 
 
