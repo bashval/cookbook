@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import FileResponse
-from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.permissions import CurrentUserOrAdmin
 from djoser.views import UserViewSet as BaseUserViewSet
@@ -19,7 +18,6 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from users.models import Subscription
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import UserRelatedModelMixin
-from .models import ShortLink
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     AvatarSerializer, FavoriteRecipeSerializer, IngredientSerializer,
@@ -110,11 +108,6 @@ class SubscriptionViewSet(UserRelatedModelMixin):
     serializer_class = SubscriptionSerializer
     ralated_object_model = User
     related_object_field_name = 'subscribing'
-
-
-def short_link_redirect(request, slug):
-    link = get_object_or_404(ShortLink, short_link_slug=slug)
-    return redirect(link.redirect_url)
 
 
 class UsersViewSet(BaseUserViewSet):

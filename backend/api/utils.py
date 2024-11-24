@@ -8,10 +8,10 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
+from shortlink.constants import SHORT_LINK_LENGTH
+from shortlink.models import ShortLink
 from .constants import (HEADER_FONT_SIZE, LINE_FONT_SIZE, NEW_LINE_OFFSET,
-                        PAGE_LEFT_MARGIN, PAGE_X_SIZE, PAGE_Y_SIZE,
-                        SHORT_LINK_LENGTH)
-from .models import ShortLink
+                        PAGE_LEFT_MARGIN, PAGE_X_SIZE, PAGE_Y_SIZE)
 
 
 def create_short_link(request, pk):

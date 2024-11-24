@@ -9,9 +9,9 @@ from recipes.models import (
 )
 from rest_framework import serializers
 
+from shortlink.models import ShortLink
 from users.models import Subscription
 from recipes.constants import MIN_IGNREDIENT_AMOUNT
-from .models import ShortLink
 
 User = get_user_model()
 
