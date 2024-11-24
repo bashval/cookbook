@@ -4,13 +4,8 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from djoser.serializers import UserSerializer
 from recipes.models import (
-    FavoriteRecipe,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    RecipeTag,
-    ShoppingCart,
-    Tag,
+    FavoriteRecipe, Ingredient, Recipe, RecipeIngredient,
+    RecipeTag, ShoppingCart, Tag,
 )
 from rest_framework import serializers
 
@@ -54,12 +49,6 @@ class UserReadSerializer(UserSerializer):
             current_user.is_authenticated
             and obj.subscribers.filter(user=current_user).exists()
         )
-
-
-# class AmountSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = RecipeIngredient
-#         fields = ('amount',)
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -168,9 +157,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
-        # print('____tags____', tags)
         ingredients = validated_data.pop('ingredients')
-        # print('____ingeds_____', ingredients)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.tags.set(tags)
@@ -180,8 +167,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 ingredient['id'],
                 through_defaults={'amount': ingredient['amount']}
             )
-        # instance.ingredients.set([
-        #     ingredient['id'], )
         instance.save()
         return instance
 
@@ -218,15 +203,6 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-# class UserRelatedBaseSerializer(serializers.ModelSerializer):
-
-#     def save(self, **kwargs):
-#         model = self.Meta.model
-#         if model.objects.filter(**kwargs).exists():
-#             raise serializers.ValidationError('Объект уже был добавлен ранее.')
-#         return super().save(**kwargs)
-
-
 class UserRecipeBaseSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
@@ -238,7 +214,6 @@ class FavoriteRecipeSerializer(UserRecipeBaseSerializer):
     class Meta:
         model = FavoriteRecipe
         fields = ('user', 'recipe')
-        # read_only_fields = ('user', 'recipe')
         validators = (
             serializers.UniqueTogetherValidator(
                 queryset=FavoriteRecipe.objects.all(),
@@ -252,7 +227,6 @@ class ShoppingCartSerialiser(UserRecipeBaseSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('user', 'recipe')
-        # read_only_fields = ('user', 'recipe')
         validators = (
             serializers.UniqueTogetherValidator(
                 queryset=ShoppingCart.objects.all(),
