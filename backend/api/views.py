@@ -14,7 +14,6 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import Subscription
-
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import UserRelatedModelMixin
 from .permissions import IsOwnerOrReadOnly

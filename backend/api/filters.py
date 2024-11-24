@@ -3,7 +3,6 @@ from django_filters.rest_framework import (BooleanFilter, CharFilter,
                                            FilterSet,
                                            ModelMultipleChoiceFilter,
                                            NumberFilter)
-
 from recipes.models import Ingredient, Recipe, Tag
 
 
