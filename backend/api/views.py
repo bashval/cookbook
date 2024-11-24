@@ -4,26 +4,29 @@ from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.permissions import CurrentUserOrAdmin
 from djoser.views import UserViewSet as BaseUserViewSet
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
-                            Tag)
+from recipes.models import (
+    FavoriteRecipe, Ingredient, Recipe, ShoppingCart, Tag
+)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (
+    IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from users.models import Subscription
 
+from users.models import Subscription
 from .filters import IngredientFilter, RecipeFilter
 from .mixins import UserRelatedModelMixin
 from .models import ShortLink
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (AvatarSerializer, FavoriteRecipeSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          ShoppingCartSerialiser, ShortLinkSerializer,
-                          ShortRecipeSerializer, SubscriptionReadSerializer,
-                          SubscriptionSerializer, TagSerializer)
+from .serializers import (
+    AvatarSerializer, FavoriteRecipeSerializer, IngredientSerializer,
+    RecipeCreateSerializer, RecipeReadSerializer, ShoppingCartSerialiser,
+    ShortLinkSerializer, ShortRecipeSerializer, SubscriptionReadSerializer,
+    SubscriptionSerializer, TagSerializer
+)
 from .utils import create_short_link, get_pdf_shopping_list
 
 User = get_user_model()
@@ -47,13 +50,17 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     permission_classes = [IsOwnerOrReadOnly, IsAuthenticatedOrReadOnly]
-    serializer_class = RecipeSerializer
-    queryset = Recipe.objects.all()
+    serializer_class = RecipeCreateSerializer
+    queryset = Recipe.objects.all().prefetch_related(
+        'is_favorited', 'in_shopping_cart'
+    )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
         if self.action == 'favorite' or self.action == 'shopping_cart':
             return ShortRecipeSerializer
+        elif self.request.method == 'GET':
+            return RecipeReadSerializer
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
@@ -103,10 +110,10 @@ class SubscriptionViewSet(UserRelatedModelMixin):
     ralated_object_model = User
     related_object_field_name = 'subscribing'
 
-    def initial(self, request, *args, **kwargs):
-        super().initial(request, *args, **kwargs)
-        if request.user == self.relted_object:
-            raise ParseError('Нельзя подписаться на самого себя.')
+    # def initial(self, request, *args, **kwargs):
+    #     super().initial(request, *args, **kwargs)
+    #     if request.user == self.relted_object:
+    #         raise ParseError('Нельзя подписаться на самого себя.')
 
 
 def short_link_redirect(request, slug):
@@ -141,7 +148,7 @@ class UsersViewSet(BaseUserViewSet):
     @action(['get'], detail=False, permission_classes=[CurrentUserOrAdmin])
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
-        if request.method == "GET":
+        if request.method == 'GET':
             return self.retrieve(request, *args, **kwargs)
 
     @action(['get'], detail=False, permission_classes=(IsAuthenticated, ))

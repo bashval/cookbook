@@ -16,6 +16,10 @@ class UserRelatedModelMixin(
             'user': request.user,
             self.related_object_field_name: self.relted_object
         }
+        self.request.data.update({
+            'user': request.user.id,
+            self.related_object_field_name: self.relted_object.id
+        })
 
     def get_object(self):
         if not self.queryset.filter(**self.filter_parameters).exists():
