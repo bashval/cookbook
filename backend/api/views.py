@@ -1,15 +1,15 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.permissions import CurrentUserOrAdmin
 from djoser.views import UserViewSet as BaseUserViewSet
 from recipes.models import (
-    FavoriteRecipe, Ingredient, Recipe, ShoppingCart, Tag
+    FavoriteRecipe, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 )
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ParseError
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly
 )
@@ -78,14 +78,15 @@ class RecipeViewSet(ModelViewSet):
 
     @action(['get'], detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        shopping_cart = (
-            self.queryset
-            .filter(is_in_shopping_cart__user=request.user)
-            .prefetch_related(
-                'recipeingredient_set',
-                'recipeingredient_set__ingredient'
-            ))
-        file = get_pdf_shopping_list(shopping_cart)
+        ingredients_amounts = (
+            RecipeIngredient.objects.filter(
+                recipe__is_in_shopping_cart__user=request.user
+            ).values(
+                'ingredient__name',
+                'ingredient__measurement_unit'
+            ).annotate(Sum('amount'))
+        )
+        file = get_pdf_shopping_list(ingredients_amounts)
         return FileResponse(
             file, as_attachment=True, filename='shopping_list.pdf')
 
@@ -109,11 +110,6 @@ class SubscriptionViewSet(UserRelatedModelMixin):
     serializer_class = SubscriptionSerializer
     ralated_object_model = User
     related_object_field_name = 'subscribing'
-
-    # def initial(self, request, *args, **kwargs):
-    #     super().initial(request, *args, **kwargs)
-    #     if request.user == self.relted_object:
-    #         raise ParseError('Нельзя подписаться на самого себя.')
 
 
 def short_link_redirect(request, slug):

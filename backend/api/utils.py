@@ -40,24 +40,6 @@ def create_short_link(request, pk):
     return new_short_link
 
 
-def get_ingredients_amount(recipes: QuerySet) -> list:
-    """Retrieve ingtedients from queryset of recipes,
-    calculates total amount af all ingredients
-    and returns a list of ingredients and amounts.
-    """
-    count = 0
-    shoping_list = {}
-    for recipe in recipes:
-        for ingredient in recipe.ingredients.all():
-            ingredient_name = ingredient.__str__()
-            count += 1
-            ingredient_amount = (
-                ingredient.recipeingredient_set.get(recipe=recipe).amount)
-            total_amount = shoping_list.setdefault(ingredient_name, 0)
-            shoping_list[ingredient_name] = total_amount + ingredient_amount
-    return [f'{name} - {amount}' for name, amount in shoping_list.items()]
-
-
 def print_list_to_pdf(data: list, list_header) -> BytesIO:
     """Returns BinaryI/O object with pdf page of data
     printed in a list line by line with list header on the top.
@@ -84,6 +66,12 @@ def print_list_to_pdf(data: list, list_header) -> BytesIO:
     return buffer
 
 
-def get_pdf_shopping_list(recipes: QuerySet) -> BytesIO:
-    shoping_list = get_ingredients_amount(recipes)
+def get_pdf_shopping_list(ingredients: QuerySet) -> BytesIO:
+    shoping_list = [
+        '{} - {} ({})'.format(
+            ingredient['ingredient__name'],
+            ingredient['amount__sum'],
+            ingredient['ingredient__measurement_unit']
+        ) for ingredient in ingredients
+    ]
     return print_list_to_pdf(shoping_list, 'Список покупок:')
