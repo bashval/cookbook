@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .constants import (INGREDIENT_NAME_LENGTH, MAX_COOKING_TIME,
-                        MIN_COOKING_TIME, MIN_IGREDIENT_AMOUNT,
+                        MIN_COOKING_TIME, MIN_IGNREDIENT_AMOUNT,
                         RECIPE_NAME_LENGTH, TAG_NAME_LENGTH, TAG_SLUG_LENGTH,
                         UNIT_NAME_LENGTH)
 
@@ -106,9 +106,9 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество',
         validators=[
             MinValueValidator(
-                MIN_IGREDIENT_AMOUNT,
+                MIN_IGNREDIENT_AMOUNT,
                 message=('Количество ингредиента не может быть'
-                         f'меньше {MIN_IGREDIENT_AMOUNT}.')
+                         f'меньше {MIN_IGNREDIENT_AMOUNT}.')
             )
         ]
     )
