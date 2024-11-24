@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 
 from shortlink.constants import SHORT_LINK_LENGTH
 from shortlink.models import ShortLink
+
 from .constants import (HEADER_FONT_SIZE, LINE_FONT_SIZE, NEW_LINE_OFFSET,
                         PAGE_LEFT_MARGIN, PAGE_X_SIZE, PAGE_Y_SIZE)
 
