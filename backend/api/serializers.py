@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from recipes.constants import MIN_IGNREDIENT_AMOUNT
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
-                            RecipeIngredient, RecipeTag, ShoppingCart, Tag)
+                            RecipeIngredient, ShoppingCart, Tag)
 from shortlink.models import ShortLink
 from users.models import Subscription
 
@@ -136,28 +136,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
 
-    def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
-
-        recipe = Recipe.objects.create(**validated_data)
-        RecipeTag.objects.bulk_create([
-            RecipeTag(recipe=recipe, tag=tag) for tag in tags
-        ])
-        RecipeIngredient.objects.bulk_create([
-            RecipeIngredient(
-                recipe=recipe,
-                ingredient=ingredient['id'],
-                amount=ingredient['amount']
-            ) for ingredient in ingredients
-        ])
-        return recipe
-
-    def update(self, instance, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+    def set_related_objects(self, instance, tags, ingredients):
         instance.tags.set(tags)
         instance.ingredients.clear()
         for ingredient in ingredients:
@@ -165,6 +144,20 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 ingredient['id'],
                 through_defaults={'amount': ingredient['amount']}
             )
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+        self.set_related_objects(recipe, tags, ingredients)
+        return recipe
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        self.set_related_objects(instance, tags, ingredients)
         instance.save()
         return instance
 
@@ -203,6 +196,12 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 class UserRecipeBaseSerializer(serializers.ModelSerializer):
 
+    def save(self, **kwargs):
+        model = self.Meta.model
+        if model.objects.filter(**kwargs).exists():
+            raise serializers.ValidationError('Объект уже был добавлен ранее.')
+        return super().save(**kwargs)
+
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         return ShortRecipeSerializer(Recipe.objects.get(id=ret['recipe'])).data
@@ -212,39 +211,21 @@ class FavoriteRecipeSerializer(UserRecipeBaseSerializer):
     class Meta:
         model = FavoriteRecipe
         fields = ('user', 'recipe')
-        validators = (
-            serializers.UniqueTogetherValidator(
-                queryset=FavoriteRecipe.objects.all(),
-                fields=('user', 'recipe'),
-                message='Рецепт уже добавлен в корзину.'
-            ),
-        )
+        read_only_fields = ('user', 'recipe')
 
 
 class ShoppingCartSerialiser(UserRecipeBaseSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('user', 'recipe')
-        validators = (
-            serializers.UniqueTogetherValidator(
-                queryset=ShoppingCart.objects.all(),
-                fields=('user', 'recipe'),
-                message='Рецепт уже добавлен в корзину.'
-            ),
-        )
+        read_only_fields = ('user', 'recipe')
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = ('user', 'subscribing')
-        validators = (
-            serializers.UniqueTogetherValidator(
-                queryset=Subscription.objects.all(),
-                fields=('user', 'subscribing'),
-                message='Такая подписка уже существует.'
-            ),
-        )
+        read_only_fields = ('user', 'subscribing')
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -252,12 +233,12 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             User.objects.get(id=ret['subscribing']), context=self.context
         ).data
 
-    def validate(self, attrs):
-        if attrs['user'] == attrs['subscribing']:
-            raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя.'
-            )
-        return super().validate(attrs)
+    def save(self, **kwargs):
+        model = self.Meta.model
+        if (model.objects.filter(**kwargs).exists()
+                or kwargs['user'] == kwargs['subscribing']):
+            raise serializers.ValidationError('Hеверный запрос.')
+        return super().save(**kwargs)
 
 
 class SubscriptionReadSerializer(UserReadSerializer):
