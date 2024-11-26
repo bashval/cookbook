@@ -1,8 +1,8 @@
 from django.db.models import Q
 from django_filters.rest_framework import (BooleanFilter, CharFilter,
                                            FilterSet,
-                                           ModelMultipleChoiceFilter,
-                                           NumberFilter)
+                                           ModelMultipleChoiceFilter)
+
 from recipes.models import Ingredient, Recipe, Tag
 
 
@@ -15,7 +15,6 @@ class IngredientFilter(FilterSet):
 
 
 class RecipeFilter(FilterSet):
-    author = NumberFilter(field_name='author')
     tags = ModelMultipleChoiceFilter(
         field_name='tags__slug',
         queryset=Tag.objects.all(),
