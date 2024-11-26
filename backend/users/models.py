@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import F, Q
 
 from .constants import EMAIL_LENGTH, NAME_LENGTH
 
@@ -43,6 +44,9 @@ class Subscription(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'subscribing'], name='unique_followers'
+            ),
+            models.CheckConstraint(
+                check=~(Q(user=F('subscribing'))), name='self_subscribing'
             )
         ]
 
