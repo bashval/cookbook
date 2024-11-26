@@ -50,7 +50,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient, through='RecipeIngredient', verbose_name='Ингредиенты')
     tags = models.ManyToManyField(
-        Tag, through='RecipeTag', verbose_name='Тег')
+        Tag, through='RecipeTag', verbose_name='Теги')
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         validators=[
@@ -90,7 +90,7 @@ class RecipeTag(models.Model):
         verbose_name_plural = 'Теги рецептов'
         constraints = [
             models.UniqueConstraint(
-                fields=['tag', 'recipe'], name='unique_tag_for_recipe')
+                fields=['tag', 'recipe'], name='unique_tag_for_recipe'),
         ]
 
     def __str__(self):
