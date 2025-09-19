@@ -1,33 +1,53 @@
-#  Foodgram
+<h1 align="center"> 
+Foodgram
+</h1>
 
-## Описание
+Foodgram is a project where users can share recipes for various dishes.
 
-Foodgram - это проект, где пользователи могут поделиться друг с другом рецептами приготовления различных блюд. Функционал проекта позволяет зарегистрированным пользователям добавлять понравившиеся рецепты в избранное, подписываться на других пользователей, добавлять рецепты в корзину и скачивать список ингредиентов для рецептов из корзины в виде pdf файла.
+## Features
+- REST API backend for SPA
+- Registered users can create new recipes from the ingredients available on the site
+- New ingredients can be added only by admin in admin section
+- Regirtered users can add recipes and other users to favorites and put recipes to the shopping cart
+- Cumulative list of ingredients from shopping cart can be downloded in PDF format
+- Recipes can be shared by creating a short link to it
+- Containerized with Docker (PostgreSQL, Nginx, backend, frontend)
+- Implemented CI/CD pipeline with GitHub Actions (automatic testing and deployment)
+- Configured Nginx as reverse proxy for backend/frontend
 
-Данный проект является курсовым проектом платформы [Яндекс.Практикума](https://practicum.yandex.ru/) и представляет собой SPA приложение. Фротнэнд был предоставлен Яндекс Практимумом, бекэнд а также инструкции для `Docker` и `CI/CD` автоматизации написаны [Валентином Башкатовым](https://github.com/bashval).
+## 🛠️ Tech Stack
 
-## Как развернуть проект
+![Django](https://img.shields.io/badge/-Django-092E20?logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/-DRF%20(Django%20REST)-8C1D40?logo=django&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white)
 
-В проекте реализована возможность запуска двух версий: обычной и для продакшена. Обычная версия подходит для разворачивания на локальной машине для отладки и тестирования, а также для написания новых "фич". Продакшн версия нужна для развертывании на удаленном продакшн-сервере, чтобы к ней обращались непосредственно юзеры. 
+## How to Deploy the Project
 
-Для запуска локально используется файл `docker-compose.yml` - он написан так, что строит имиджи и запускает контейнеры из кода проекта находящегося непосредственно на самой локальной машине.  
+The project supports two versions: a development version and a production version. The development version is suitable for local setup, debugging, testing, and developing new features. The production version is intended for deployment on a remote server for end users.
 
-`docker-compose.production.yml` используется для запуска продакшн версии и в нем имиджи для докера беруться из удаленного репозитория на DockerHub.
+To run the project locally, use the `docker-compose.yml` file. It is configured to build Docker images and start containers directly from the project code on your local machine. 
 
-### Запуск локально
+`docker-compose.production.yml` is used to run production version. The Docker images are taken from a remote repository on DockerHub.
 
-Для того, чтобы запустить проект локально, необходимо:
+### Local Deployment
 
-- На локальной машине клонировать репозиторий и перейти в него в командной строке:
+To run the project locally, follow these steps:
 
-```git clone https://github.com/bashval/foodgram.git```
+1. Clone the repository and navigate into it:
 
-```cd foodgram```
+```bash
+git clone https://github.com/bashval/foodgram.git
+cd foodgram
+```
 
-- В директории проекта создать файл переменных окружения `.env`. За основу можно взять файл `.env.example`. 
+2. Create a `.env` file in the project directory. You can base it on the `.env.example` template.
 
-- Установить Docker Compose:
-```Bash
+3. Install Docker Compose:
+
+```bash
 sudo apt update
 sudo apt install curl
 curl -fSL https://get.docker.com -o get-docker.sh
@@ -35,25 +55,31 @@ sudo sh ./get-docker.sh
 sudo apt install docker-compose-plugin
 ```
 
-- Запустить Docker Compose используя файл `docker-compose.yml`:
+4. Start the containers using the `docker-compose.yml` file:
 
-```sudo docker compose -f docker-compose.yml up -d```
-
-При запуску контейнеров настроено автоматическое выполние миграций, сбор и копирование статических файлов бэкенда. Также настроена автоматическая загрузка Ингредиентов и Тегов в базу данных из csv файлов.
-
-Проект будет доступен после запуска контейнеров по адресу http://localhost:8000
-
-### Запуск удаленно
-
-Для запуска проекта на удаленном сервере:
-
-- Подключитесь к удалённому серверу:
-```Bash
-ssh -i путь_до_файла_с_SSH_ключом/название_файла_с_SSH_ключом имя_пользователя@ip_адрес_сервера
+```bash
+sudo docker compose -f docker-compose.yml up -d
 ```
 
-- На удаленном сервере установите Docker Compose:
-```Bash
+During startup, the containers automatically run database migrations, collect and copy static files, and load ingredients and tags into the database from CSV files.
+
+The project will be accessible at [http://localhost:8000](http://localhost:8000).
+
+---
+
+### Remote Deployment
+
+To deploy on a remote server:
+
+1. Connect to the server via SSH:
+
+```bash
+ssh -i path_to_ssh_key/your_ssh_key user@server_ip
+```
+
+2. Install Docker Compose on the server:
+
+```bash
 sudo apt update
 sudo apt install curl
 curl -fSL https://get.docker.com -o get-docker.sh
@@ -61,39 +87,41 @@ sudo sh ./get-docker.sh
 sudo apt install docker-compose-plugin
 ```
 
-- Создайте директорию для проекта перейдите в неё:
+3. Create a directory for the project and navigate into it:
 
-```mkdir foodgram```
-
-```cd foodgram```
-
-- Скопируйте на сервер в директорию проекта файл docker-compose.production.yml:
-
-```Bash
-scp -i path_to_SSH/SSH_name docker-compose.production.yml \
-    username@server_ip:/home/username/taski/docker-compose.production.yml
+```bash
+mkdir foodgram
+cd foodgram
 ```
 
-- В директории проекта создйте файл переменных окружения `.env`. За основу можно взять файл `.env.example`. Или, усли уже имеется готовый .env-файл, то можно скопировать его таким же способом, как в предыдущем шаге. 
+4. Copy the production Docker Compose file to the server:
 
-- Запустите Docker Compose используя файл `docker-compose.production.yml`:
+```bash
+scp -i path_to_ssh_key/docker-compose.production.yml your_username@server_ip:/home/your_username/foodgram/docker-compose.production.yml
+```
 
-```sudo docker compose -f docker-compose.production.yml up -d```
+5. Create a `.env` file in the directory, based on `.env.example` or with your custom configuration.
 
-При запуску контейнеров настроено автоматическое выполние миграций, сбор и копирование статических файлов бэкенда. Также настроена автоматическая загрузка Ингредиентов и Тегов в базу данных из csv файлов.
+6. Start the containers with the production compose file:
 
-Проект будет доступен после запуска контейнеров по адресу http://<ip_адрес_сервера>:8000
+```bash
+sudo docker compose -f docker-compose.production.yml up -d
+```
 
-Можно настроить дополнительный сервер nginx, чтобы он принимал запросы на необходимое доменное имя и перенаправлял их на nginx сервер в кортейнере.
+Similar to local setup, containers will run database migrations, collect static files, and load ingredients and tags from CSV files.
+
+The project will be available at `http://<server_ip>:8000`.
+
+Optionally, you can configure an additional Nginx server to route requests from your domain to the Nginx container in Docker, enabling use of your custom domain name.
 
 ## GitHub Action Workflow
 
-К проекту подключена `CI/CD` инструкция от платформы GitHub Action [![Main Foodgram Workflow](https://github.com/bashval/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/bashval/foodgram/actions/workflows/main.yml)
+ The project is integrated with a `CI/CD` pipeline using GitHub Actions. [![Main Foodgram Workflow](https://github.com/bashval/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/bashval/foodgram/actions/workflows/main.yml)
 
-Инструкция запускается при команде `git push` в любую из веток проекта. В ходе выполнения инструкции запускаются автоматические тесты для фронтенда и бэкенда. Далее, если тесты прошли успешно и **только** если  `push` выполнен в ветку `main`, произойдет сбока Docker имеджей на основе залитого кода и загрузка собранных имеджей на удаленный репозиторий на DockerHub. В дальнейшем на осове данных имеджей производится автоматический разворот проекта на удаленном сервере для продакшна. 
+The workflow is triggered automatically whenever a git push is made to any branch. During execution, automatic tests are run for both the frontend and backend. If all tests pass successfully, and only if the push is to the main branch, Docker images based on the latest code are built and uploaded to Docker Hub. 
 
-## Авторы
-Данный проект выполнялся в качестве курсового проекта "Python-разработчик+" [Яндекс.Практикума](https://practicum.yandex.ru/).  
-Автор проекта: [Валентин Башкатов](https://github.com/bashval).
+In the future, the project on the remote server will be automatically deployed using these images for production. 
 
-![Technologies Used](https://github-readme-tech-stack.vercel.app/api/cards?title=Technologies+Used&align=center&titleAlign=center&fontSize=28&lineCount=1&theme=blood&width=730&bg=%23FFFFFF&badge=%23EBEBEB&border=%23EBEBEB&titleColor=%23FF5F5F&line1=Python%2CPython%2C1799ea%3BDjango%2Cdjango%2C1799ea%3Bdjango+rest+framework%2Cdjango+rest+framework%2C1799ea%3Bdocker%2Cdocker%2C1799ea%3Bgithub+actions%2Cgithub+actions%2C1799ea%3B)
+## Authors
+
+Backend developer, Docker instructions and CI/CD implementation by : [Valentin Bashkatov](https://github.com/bashval).
