@@ -17,8 +17,9 @@ Foodgram is a project where users can share recipes for various dishes.
 
 ## 🛠️ Tech Stack
 
-![Django](https://img.shields.io/badge/-Django-092E20?logo=django&logoColor=white)
-![DRF](https://img.shields.io/badge/-DRF%20(Django%20REST)-8C1D40?logo=django&logoColor=white)
+![Python](https://img.shields.io/badge/Python_3.x-3776AB?logo=python&logoColor=yellow)
+![Django](https://img.shields.io/badge/Django-092E20?logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/DRF%20(Django%20REST)-8C1D40?logo=django&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=nginx&logoColor=white)
@@ -124,4 +125,4 @@ In the future, the project on the remote server will be automatically deployed u
 
 ## Authors
 
-Backend developer, Docker instructions and CI/CD implementation by : [Valentin Bashkatov](https://github.com/bashval).
+Backend, Docker instructions and CI/CD implementation done by : [Valentin Bashkatov](https://github.com/bashval).
