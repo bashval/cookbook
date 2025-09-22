@@ -118,7 +118,8 @@ Optionally, you can configure an additional Nginx server to route requests from 
 ## GitHub Action Workflow
 
  The project is integrated with a `CI/CD` pipeline using GitHub Actions.
- [![Main Foodgram Workflow](https://github.com/bashval/cookbook/actions/workflows/main.yml/badge.svg)](https://github.com/bashval/cookbook/actions/workflows/main.yml)
+ <!-- Server not available at the moment. Uncomment when it will be available...
+ [![Main Foodgram Workflow](https://github.com/bashval/cookbook/actions/workflows/main.yml/badge.svg)](https://github.com/bashval/cookbook/actions/workflows/main.yml) -->
 
 The workflow is triggered automatically whenever a git push is made to any branch. During execution, automatic tests are run for both the frontend and backend. If all tests pass successfully, and only if the push is to the main branch, Docker images based on the latest code are built and uploaded to Docker Hub. 
 
